@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: "CloudFormation template for setting up AWS VPC, Internet Gateway, Subnets, Route Table, Security Group, Network Interfaces, and Elastic IPs for Threat Defense Virtual deployment."
+
+Parameters:
+  VpcCidrBlock:
+    Description: CIDR block for the VPC
+    Type: String
+    Default: "10.0.0.0/16"
+
+Resources:
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidrBlock
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+
+  MyInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: MyInternetGateway
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref MyVPC
+      InternetGatewayId: !Ref MyInternetGateway
+
+  MyRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+
+  RouteToInternetGateway:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref MyRouteTable
+      DestinationCidrBlock: "0.0.0.0/0"
+      GatewayId: !Ref MyInternetGateway
+
+  MySecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "Security Group for Threat Defense Virtual"
+      VpcId: !Ref MyVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: MySecurityGroup
+
+  MySubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: "10.0.1.0/24"
+      AvailabilityZone: "us-east-1a" # Replace with your desired AZ
+
+  MyNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      Description: "Network Interface for Threat Defense Virtual"
+      SubnetId: !Ref MySubnet
+      PrivateIpAddress: 10.0.1.10
+      GroupSet:
+        - !Ref MySecurityGroup
+
+  MyElasticIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+Outputs:
+  VPCID:
+    Value: !Ref MyVPC
+  SecurityGroupID:
+    Value: !Ref MySecurityGroup
+  NetworkInterfaceID:
+    Value: !Ref MyNetworkInterface
+  ElasticIP:
+    Value: !GetAtt MyElasticIP.AllocationId
