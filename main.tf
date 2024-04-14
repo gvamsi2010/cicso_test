@@ -6,6 +6,7 @@ provider "aws" {
 # VPC Resource with Tags
 resource "aws_vpc" "fmc_ftd_vpc" {
   cidr_block = var.vpc_cidr_block
+  assign_generated_ipv6_cidr_block = true
   enable_dns_support       = true
   tags = {
     Name = "fmc-ftd-vpc"
