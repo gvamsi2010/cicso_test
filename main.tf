@@ -68,9 +68,7 @@ resource "aws_route" "fmc_public_route" {
 resource "aws_route" "fmc_private_route" {
   route_table_id  = aws_route_table.fmc_private_route_table.id
   destination_cidr_block = "0.0.0.0/0"
-  # Replace with appropriate resource (e.g., internet gateway or FTD instance)
-  # This will be updated in the output module
-  #instance_id     = ""  # Placeholder for FTD instance (to be determined later)
+  gateway_id = aws_internet_gateway.fmc_ftd_igw
 }
 
 # VPC Main Route Table Association (Public and Private Subnets)
