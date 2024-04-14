@@ -7,6 +7,7 @@ provider "aws" {
 resource "aws_vpc" "fmc_ftd_vpc" {
   cidr_block = var.vpc_cidr_block
   assign_generated_ipv6_cidr_block = true
+  instance_tenancy = "default"
   enable_dns_support       = true
   tags = {
     Name = "fmc-ftd-vpc"
@@ -26,7 +27,7 @@ resource "aws_internet_gateway" "fmc_ftd_igw" {
 resource "aws_subnet" "fmc_public_subnet" {
   vpc_id            = aws_vpc.fmc_ftd_vpc.id
   cidr_block         = var.public_subnet_cidr_block
-  availability_zone = var.public_subnet_az
+  availability_zone = ""
   map_public_ip_on_launch = true
   tags = {
     Name = "fmc-public-subnet"
@@ -37,7 +38,7 @@ resource "aws_subnet" "fmc_public_subnet" {
 resource "aws_subnet" "fmc_private_subnet" {
   vpc_id            = aws_vpc.fmc_ftd_vpc.id
   cidr_block         = var.private_subnet_cidr_block
-  availability_zone = var.private_subnet_az
+  availability_zone = ""
   tags = {
     Name = "fmc-private-subnet"
   }
