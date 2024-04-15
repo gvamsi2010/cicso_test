@@ -17,18 +17,18 @@ Resources:
         - IpProtocol: tcp
           FromPort: 22
           ToPort: 22
-          CidrIp: 0.0.0.0/0  # SSH access
+          CidrIp: 0.0.0.0/0  #  for SSH access
         - IpProtocol: tcp
           FromPort: 443
           ToPort: 443
-          CidrIp: 0.0.0.0/0  #  HTTPS access
+          CidrIp: 0.0.0.0/0  #  for HTTPS access
 
   MyEC2Instance:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: !Ref InstanceType
-      ImageId: ami-xxxxxx  #  AMI ID for Cisco Threat Defense Virtual
-      SubnetId: subnet-0499d3c4c8c9bc9a1  #  subnet ID
+      ImageId: ami-xxxxxx  # AMI ID for Cisco Threat Defense Virtual
+      SubnetId: subnet-0499d3c4c8c9bc9a1  # Your subnet ID
       SecurityGroupIds:
         - !Ref MySecurityGroup
       UserData:
@@ -40,12 +40,20 @@ Resources:
           echo '    "Hostname": "<your_hostname>",' >> /etc/config.yaml
           echo '    "ManageLocally": "Yes"' >> /etc/config.yaml
           echo '}' >> /etc/config.yaml
+          # Run pre-snapshot process
+          echo "expert" >> /tmp/pre_snapshot_script.sh
+          echo "admin@FTDvbaseimg:~$ sudo su" >> /tmp/pre_snapshot_script.sh
+          echo "root@firepower:/ngfw/var/common# prepare_snapshot" >> /tmp/pre_snapshot_script.sh
+          echo "Do you want to continue [Y/N]:" >> /tmp/pre_snapshot_script.sh
+          echo "Y" >> /tmp/pre_snapshot_script.sh
+          chmod +x /tmp/pre_snapshot_script.sh
+          /tmp/pre_snapshot_script.sh
 
       NetworkInterfaces:
-        - AssociatePublicIpAddress: 'true'  # Enable auto-generation of public IPv4 addresses
+        - AssociatePublicIpAddress: 'true'  
           DeviceIndex: '0'  # eth0
           SubnetId: subnet-0499d3c4c8c9bc9a1  # Subnet for eth0
-        - AssociatePublicIpAddress: 'true'  # Enable auto-generation of public IPv4 addresses
+        - AssociatePublicIpAddress: 'true'  
           DeviceIndex: '1'  # eth1
           SubnetId: subnet-0499d3c4c8c9bc9a1  # Subnet for eth1
 
